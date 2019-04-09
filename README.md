@@ -1,4 +1,4 @@
-  # Metaheurística: Práctica 4
+  # Inteligencia Artificial: Práctica 4
 
 ### Contexto
 Basada en el juego de 4 en rayas (conecta-N), donde dos jugadores introducen fichas, alternándose por turnos, en un tablero vertical con el objetivo de alinear cuatro fichas de un mismo color de forma consecutiva (bien en horizontal, vertical o en diagonal). El tablero original está formado por 6 filas y 7 columnas, aunque existen otras variaciones con diferentes tamaños.
