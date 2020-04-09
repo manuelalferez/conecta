@@ -20,7 +20,11 @@ public class IAPlayer extends Player {
     @Override
     public int turnoJugada(Grid tablero, int conecta) {
         CONECTA_N = conecta;
-        Grid copia_tablero = tablero;
+        System.out.println("1");
+        Grid copia_tablero = new Grid(tablero.getFilas(), tablero.getColumnas(), "assets/player1.png", "assets/player2.png");
+        System.out.println("2");
+        copiarTablero(tablero, copia_tablero);
+        System.out.println("3");
         int mejorJugada = algoritmoMinMax(copia_tablero);
         return tablero.checkWin(tablero.setButton(mejorJugada, Conecta4.PLAYER2), mejorJugada, conecta);
     }
@@ -91,5 +95,33 @@ public class IAPlayer extends Player {
         return primer > segundo ? primer : segundo;
     }
 
+    private void copiarTablero(Grid tablero_origen, Grid tablero_destino) {
+        int casillas[][] = tablero_origen.toArray();
+        System.out.println("Tablero destino inicio:");
+        tablero_destino.print();
+        for (int fila = 0; fila < tablero_origen.getFilas(); fila++) {
+            for (int col = 0; col < tablero_origen.getColumnas(); col++) {
+                if(tablero_origen.getButton(col,fila)==1){
+                    tablero_destino.setButton(col, Conecta4.PLAYER1);
+                }else if(tablero_origen.getButton(col,fila)==-1){
+                    tablero_destino.setButton(col, Conecta4.PLAYER2);
+                }
+            }
+        }
+        System.out.println("Tablero destino después:");
+        tablero_destino.print();
+    }
+
+    // Método para mostrar el estado actual del tablero por la salida estándar
+    private void print(int tablero[][]) {
+        //System.out.println("Conecta-N:");
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                System.out.print(tablero[i][j] + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
 
 }
