@@ -1,5 +1,7 @@
 package conecta4;
 
+import javax.swing.*;
+
 /**
  * Esta clase representa la inteligencia artificial cuyo objetivo es ganar a su adversario humano.
  * <p>
@@ -22,6 +24,9 @@ public class IAPlayer extends Player {
         CONECTA_N = conecta;
         System.out.println("1");
         Grid copia_tablero = new Grid(tablero.getFilas(), tablero.getColumnas(), "assets/player1.png", "assets/player2.png");
+        inicializar(copia_tablero);
+        copia_tablero.reset();
+
         System.out.println("2");
         copiarTablero(tablero, copia_tablero);
         System.out.println("3");
@@ -101,9 +106,9 @@ public class IAPlayer extends Player {
         tablero_destino.print();
         for (int fila = 0; fila < tablero_origen.getFilas(); fila++) {
             for (int col = 0; col < tablero_origen.getColumnas(); col++) {
-                if(tablero_origen.getButton(col,fila)==1){
+                if (tablero_origen.getButton(col, fila) == 1) {
                     tablero_destino.setButton(col, Conecta4.PLAYER1);
-                }else if(tablero_origen.getButton(col,fila)==-1){
+                } else if (tablero_origen.getButton(col, fila) == -1) {
                     tablero_destino.setButton(col, Conecta4.PLAYER2);
                 }
             }
@@ -122,6 +127,17 @@ public class IAPlayer extends Player {
             System.out.println();
         }
         System.out.println();
+    }
+
+    public void inicializar(Grid tablero) {
+        for (int fila = 0; fila < tablero.getFilas(); fila++) {
+            for (int col = 0; col < tablero.getColumnas(); col++) {
+                JButton boton = tablero.getJButton(col,fila);
+                boton = new JButton();
+                int celda = tablero.getButton(col,fila) ;
+                celda = 0;
+            }
+        }
     }
 
 }
