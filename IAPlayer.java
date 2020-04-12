@@ -1,5 +1,8 @@
 package conecta4;
 
+import java.io.FileWriter;
+import java.io.PrintWriter;
+
 /**
  * Esta clase representa la inteligencia artificial cuyo objetivo es ganar a su adversario humano.
  * <p>
@@ -14,6 +17,8 @@ public class IAPlayer extends Player {
     private int FILAS;
     private int COLUMNAS;
     private int tablero_copia[][];
+    private String VACIAR = "";
+    String log = "";
 
     /**
      * @param tablero Representación del tablero de juego
@@ -25,11 +30,12 @@ public class IAPlayer extends Player {
         CONECTA_N = conecta;
         FILAS = tablero.getFilas();
         COLUMNAS = tablero.getColumnas();
-        tablero_copia = tablero.toArray();
-        System.out.println("Inicio:");
+        copiarTablero(tablero.toArray());
         imprimirTablero();
-
         int mejorJugada = algoritmoMinMax();
+        System.out.println("Jugada en: " + mejorJugada);
+        // escribirLogs();
+        //log = VACIAR;
         return tablero.checkWin(tablero.setButton(mejorJugada, Conecta4.PLAYER2), mejorJugada, conecta);
     }
 
@@ -51,12 +57,12 @@ public class IAPlayer extends Player {
             int valoracion = PEOR_VALORACION_MAX;
             int mejor_valoracion = valoracion;
             int fila;
-            System.out.println("Profundidad: " + profundidad);
+            //log += "Profundidad: " + profundidad + "\n";
             for (int col = 0; col < COLUMNAS; col++) {
                 if (!columnaLlena(col)) {
-                    System.out.println("Soy max, Columna: " + col);
+                    //log += "Soy max, Columna: " + col + "\n";
                     fila = setFicha(col, Conecta4.PLAYER1);
-                    imprimirTablero();
+                    //imprimirTablero();
                     int estado_del_juego = checkWin(fila, col);
                     if (estado_del_juego == SIN_GANADOR) {
                         valoracion = mayorValor(valoracion, minimizar(profundidad++));
@@ -64,10 +70,8 @@ public class IAPlayer extends Player {
                             mejor_valoracion = valoracion;
                             mejor_jugada = col;
                         }
-                        tablero_copia[fila][col] = 0;
-                    } else {
-                        return estado_del_juego;
                     }
+                    tablero_copia[fila][col] = Conecta4.VACIO;
                 }
             }
             return mejor_jugada;
@@ -82,12 +86,12 @@ public class IAPlayer extends Player {
             int valoracion = PEOR_VALORACION_MIN;
             int mejor_valoracion = valoracion;
             int fila;
-            System.out.println("Profundidad: " + profundidad);
+            //log += "Profundidad: " + profundidad + "\n";
             for (int col = 0; col < COLUMNAS; col++) {
                 if (!columnaLlena(col)) {
-                    System.out.println("Soy min, Columna: " + col);
+                    //log += "Soy min, Columna: " + col + "\n";
                     fila = setFicha(col, Conecta4.PLAYER2);
-                    imprimirTablero();
+                    //imprimirTablero();
                     int estado_del_juego = checkWin(fila, col);
                     if (estado_del_juego == SIN_GANADOR) {
                         valoracion = menorValor(valoracion, maximizar(profundidad++));
@@ -95,34 +99,32 @@ public class IAPlayer extends Player {
                             mejor_valoracion = valoracion;
                             mejor_jugada = col;
                         }
-                        tablero_copia[fila][col] = 0;
-                    } else {
-                        return estado_del_juego;
                     }
+                    tablero_copia[fila][col] = Conecta4.VACIO;
                 }
             }
-            System.out.println(mejor_jugada);
+            //System.out.println(mejor_jugada);
             return mejor_jugada;
         }
     }
 
     private boolean columnaLlena(int col) {
-        return tablero_copia[0][col] != 0;
+        return tablero_copia[0][col] != Conecta4.VACIO;
     }
 
     private int setFicha(int col, int jugador) {
         int fila = FILAS - 1;
-        while ((fila >= 0) && (tablero_copia[fila][col] != 0)) {
+        while ((fila >= 0) && (tablero_copia[fila][col] != Conecta4.VACIO)) {
             fila--;
         }
         tablero_copia[fila][col] = jugador;
-        System.out.println("Pongo ficha");
+        //  System.out.println("Pongo ficha");
         return fila;
     }
 
     public boolean esEmpate() {
         for (int i = 0; i < COLUMNAS; i++) {
-            if (tablero_copia[0][i] == 0) {
+            if (tablero_copia[0][i] == Conecta4.VACIO) {
                 return false;
             }
         }
@@ -139,13 +141,41 @@ public class IAPlayer extends Player {
 
     // Método para mostrar el estado actual del tablero por la salida estándar
     private void imprimirTablero() {
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                System.out.print(tablero_copia[i][j] + " ");
+        for (int i = 0; i < FILAS; i++) {
+            for (int j = 0; j < COLUMNAS; j++) {
+                log += tablero_copia[i][j] + " ";
             }
-            System.out.println();
+            log += "\n";
         }
-        System.out.println();
+        log += "\n";
+    }
+
+    private void copiarTablero(int tablero_origen[][]) {
+        tablero_copia = new int[FILAS][COLUMNAS];
+        for (int i = 0; i < FILAS; i++)
+            for (int j = 0; j < COLUMNAS; j++)
+                tablero_copia[i][j] = tablero_origen[i][j];
+    }
+
+    private void escribirLogs() {
+        FileWriter fichero = null;
+        PrintWriter pw;
+        try {
+            fichero = new FileWriter("log.txt", true);
+            pw = new PrintWriter(fichero);
+            pw.println(log);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // Para asegurarnos que se cierra el fichero
+                if (null != fichero)
+                    fichero.close();
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
+        }
     }
 
     public int checkWin(int x, int y) {
