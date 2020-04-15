@@ -69,6 +69,9 @@ public class IAPlayer extends Player {
                         if (valoracion > mejor_valoracion) {
                             mejor_valoracion = valoracion;
                             mejor_jugada = col;
+                        } else {
+                            tablero_copia[fila][col] = Conecta4.VACIO;
+                            return estado_del_juego;
                         }
                     }
                     tablero_copia[fila][col] = Conecta4.VACIO;
@@ -98,6 +101,9 @@ public class IAPlayer extends Player {
                         if (valoracion < mejor_valoracion) {
                             mejor_valoracion = valoracion;
                             mejor_jugada = col;
+                        } else {
+                            tablero_copia[fila][col] = Conecta4.VACIO;
+                            return estado_del_juego;
                         }
                     }
                     tablero_copia[fila][col] = Conecta4.VACIO;
