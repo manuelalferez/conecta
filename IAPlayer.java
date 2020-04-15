@@ -44,8 +44,19 @@ public class IAPlayer extends Player {
      * @return La columna con el mejor movimiento
      */
     private int algoritmoMinMax() {
-        int mejor_jugada;
-        mejor_jugada = minimizar(0);
+        int mejor_jugada = SIN_JUGADA;
+        int valoracion = PEOR_VALORACION_MIN;
+        int mejor_valoracion = valoracion;
+        for (int col = 0; col < COLUMNAS; col++) {
+            if (!columnaLlena(col)) {
+                valoracion = minimizar(0);
+                System.out.println("Columna " + col + " con valoración: " + valoracion);
+                if (valoracion < mejor_valoracion) {
+                    mejor_valoracion = valoracion;
+                    mejor_jugada = col;
+                }
+            }
+        }
         return mejor_jugada;
     }
 
@@ -53,31 +64,26 @@ public class IAPlayer extends Player {
         if (esEmpate()) {
             return 0;
         } else {
-            int mejor_jugada = SIN_JUGADA;
             int valoracion = PEOR_VALORACION_MAX;
             int mejor_valoracion = valoracion;
             int fila;
             //log += "Profundidad: " + profundidad + "\n";
+            //System.out.println("Profundidad: " + profundidad);
             for (int col = 0; col < COLUMNAS; col++) {
                 if (!columnaLlena(col)) {
-                    //log += "Soy max, Columna: " + col + "\n";
-                    fila = setFicha(col, Conecta4.PLAYER1);
+                    //log += "Soy min, Columna: " + col + "\n";
+                    //System.out.println("Soy max, Columna: " + col);
+                    fila = setFicha(col, Conecta4.PLAYER2);
                     //imprimirTablero();
                     int estado_del_juego = checkWin(fila, col);
-                    if (estado_del_juego == SIN_GANADOR) {
-                        valoracion = mayorValor(valoracion, minimizar(profundidad++));
-                        if (valoracion > mejor_valoracion) {
-                            mejor_valoracion = valoracion;
-                            mejor_jugada = col;
-                        } else {
-                            tablero_copia[fila][col] = Conecta4.VACIO;
-                            return estado_del_juego;
-                        }
-                    }
+                    valoracion = mayorValor(valoracion, minimizar(profundidad++));
                     tablero_copia[fila][col] = Conecta4.VACIO;
+                    if (valoracion >= mejor_valoracion) {
+                        mejor_valoracion = valoracion;
+                    }
                 }
             }
-            return mejor_jugada;
+            return mejor_valoracion;
         }
     }
 
@@ -85,32 +91,26 @@ public class IAPlayer extends Player {
         if (esEmpate()) {
             return 0;
         } else {
-            int mejor_jugada = SIN_JUGADA;
             int valoracion = PEOR_VALORACION_MIN;
             int mejor_valoracion = valoracion;
             int fila;
             //log += "Profundidad: " + profundidad + "\n";
+            //System.out.println("Profundidad: " + profundidad);
             for (int col = 0; col < COLUMNAS; col++) {
                 if (!columnaLlena(col)) {
                     //log += "Soy min, Columna: " + col + "\n";
+                    // System.out.println("Soy min, Columna: " + col);
                     fila = setFicha(col, Conecta4.PLAYER2);
                     //imprimirTablero();
                     int estado_del_juego = checkWin(fila, col);
-                    if (estado_del_juego == SIN_GANADOR) {
-                        valoracion = menorValor(valoracion, maximizar(profundidad++));
-                        if (valoracion < mejor_valoracion) {
-                            mejor_valoracion = valoracion;
-                            mejor_jugada = col;
-                        } else {
-                            tablero_copia[fila][col] = Conecta4.VACIO;
-                            return estado_del_juego;
-                        }
-                    }
+                    valoracion = menorValor(valoracion, maximizar(profundidad++));
                     tablero_copia[fila][col] = Conecta4.VACIO;
+                    if (valoracion <= mejor_valoracion) {
+                        mejor_valoracion = valoracion;
+                    }
                 }
             }
-            //System.out.println(mejor_jugada);
-            return mejor_jugada;
+            return mejor_valoracion;
         }
     }
 
