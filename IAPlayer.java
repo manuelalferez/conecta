@@ -1,14 +1,11 @@
 package conecta4;
 
-import java.io.FileWriter;
-import java.io.PrintWriter;
-
 /**
  * Esta clase representa la inteligencia artificial cuyo objetivo es ganar a su adversario humano.
- * <p>
  * IAPlayer realizará aquellos movimiento con menor valor.
  */
 public class IAPlayer extends Player {
+    // Constantes
     private final int SIN_JUGADA = -1;
     private int CONECTA_N = 0;
     private int FILAS;
@@ -17,6 +14,7 @@ public class IAPlayer extends Player {
     private final int PEOR_VALORACION_MIN = Integer.MAX_VALUE;
     private final int PEOR_VALORACION_MAX = Integer.MIN_VALUE;
 
+    // Tablero usado para construir el árbol
     private int tablero_copia[][];
 
     /**
@@ -60,6 +58,14 @@ public class IAPlayer extends Player {
         return mejor_jugada;
     }
 
+    /**
+     * Elige el mejor movimiento para max (jugador humano)
+     *
+     * @param profundidad      Profundidad del nodo
+     * @param estado_del_juego Estado del juego
+     * @return Puesto que esta función será llamada desde algoritmoMinMax y minimizar, devolverá la mejor evaluación
+     * para el estado en el que se encuentra el tablero
+     */
     private int maximizar(int profundidad, int estado_del_juego) {
         if (estado_del_juego != 0 || esEmpate()) {
             return estado_del_juego;
@@ -82,6 +88,14 @@ public class IAPlayer extends Player {
         }
     }
 
+    /**
+     * Elige el mejor movimiento para min (jugador IA)
+     *
+     * @param profundidad      Profundidad del nodo
+     * @param estado_del_juego Estado del juego
+     * @return Puesto que esta función será llamada desde maximizar, devolverá la mejor evaluación
+     * para el estado en el que se encuentra el tablero
+     */
     private int minimizar(int profundidad, int estado_del_juego) {
         if (estado_del_juego != 0 || esEmpate()) {
             return estado_del_juego;
@@ -291,7 +305,6 @@ public class IAPlayer extends Player {
             a++;
             b--;
         }
-
         return ganador;
     }
 }
