@@ -1,18 +1,21 @@
 package conecta4;
 
-import javax.swing.*;
-
 /**
  * Esta clase representa la inteligencia artificial cuyo objetivo es ganar a su adversario humano.
- * <p>
  * IAPlayer realizará aquellos movimiento con menor valor.
  */
 public class IAPlayer extends Player {
+    // Constantes
     private final int SIN_JUGADA = -1;
     private int CONECTA_N = 0;
-    private final int SIN_GANADOR = 0;
-    private final int PEOR_VALORACION_MIN = 1;
-    private final int PEOR_VALORACION_MAX = -1;
+    private int FILAS;
+    private int COLUMNAS;
+
+    private final int PEOR_VALORACION_MIN = Integer.MAX_VALUE;
+    private final int PEOR_VALORACION_MAX = Integer.MIN_VALUE;
+
+    // Tablero usado para construir el árbol
+    private int tablero_copia[][];
 
     /**
      * @param tablero Representación del tablero de juego
@@ -22,15 +25,12 @@ public class IAPlayer extends Player {
     @Override
     public int turnoJugada(Grid tablero, int conecta) {
         CONECTA_N = conecta;
-        System.out.println("1");
-        Grid copia_tablero = new Grid(tablero.getFilas(), tablero.getColumnas(), "assets/player1.png", "assets/player2.png");
-        inicializar(copia_tablero);
-        copia_tablero.reset();
-
-        System.out.println("2");
-        copiarTablero(tablero, copia_tablero);
-        System.out.println("3");
-        int mejorJugada = algoritmoMinMax(copia_tablero);
+        FILAS = tablero.getFilas();
+        COLUMNAS = tablero.getColumnas();
+        copiarTablero(tablero.toArray());
+        imprimirTablero();
+        int mejorJugada = algoritmoMinMax();
+        System.out.println("Jugada en: " + mejorJugada);
         return tablero.checkWin(tablero.setButton(mejorJugada, Conecta4.PLAYER2), mejorJugada, conecta);
     }
 
@@ -38,106 +38,273 @@ public class IAPlayer extends Player {
      * @param tablero Estado actual del tablero
      * @return La columna con el mejor movimiento
      */
-    private int algoritmoMinMax(Grid tablero) {
+    private int algoritmoMinMax() {
         int mejor_jugada = SIN_JUGADA;
-        mejor_jugada = minimizar(tablero);
-        return mejor_jugada;
-    }
-
-    private int maximizar(Grid tablero) {
-        int mejor_jugada = SIN_JUGADA;
-        Grid copia_tablero = tablero;
-        int valoracion = PEOR_VALORACION_MAX;
-        int mejor_valoracion = valoracion;
-
-        for (int col = 0; col < tablero.getColumnas(); col++) {
-            if (!copia_tablero.fullColumn(col)) {
-                int estado_del_juego = tablero.checkWin(copia_tablero.setButton(col, Conecta4.PLAYER1), col, CONECTA_N);
-                if (estado_del_juego == SIN_GANADOR) {
-                    valoracion = mayorValor(valoracion, maximizar(copia_tablero));
-                    if (valoracion > mejor_valoracion) {
-                        mejor_valoracion = valoracion;
-                        mejor_jugada = col;
-                    }
-                    copia_tablero = tablero;
-                } else {
-                    return estado_del_juego;
-                }
-            }
-        }
-        return mejor_jugada;
-    }
-
-    private int minimizar(Grid tablero) {
-        int mejor_jugada = SIN_JUGADA;
-        Grid copia_tablero = tablero;
         int valoracion = PEOR_VALORACION_MIN;
         int mejor_valoracion = valoracion;
-
-        for (int col = 0; col < tablero.getColumnas(); col++) {
-            if (!copia_tablero.fullColumn(col)) {
-                int estado_del_juego = tablero.checkWin(copia_tablero.setButton(col, Conecta4.PLAYER2), col, CONECTA_N);
-                if (estado_del_juego == SIN_GANADOR) {
-                    valoracion = menorValor(valoracion, maximizar(copia_tablero));
-                    if (valoracion < mejor_valoracion) {
-                        mejor_valoracion = valoracion;
-                        mejor_jugada = col;
-                    }
-                    copia_tablero = tablero;
-                } else {
-                    return estado_del_juego;
+        for (int col = 0; col < COLUMNAS; col++) {
+            if (!columnaLlena(col)) {
+                int fila = setFicha(col, Conecta4.PLAYER2);
+                int estado_del_juego = checkWin(fila, col);
+                valoracion = maximizar(0, estado_del_juego);
+                tablero_copia[fila][col] = Conecta4.VACIO;
+                System.out.println("Columna " + col + ", con valoración: " + valoracion);
+                if (valoracion < mejor_valoracion) {
+                    mejor_valoracion = valoracion;
+                    mejor_jugada = col;
                 }
             }
         }
         return mejor_jugada;
     }
 
-    private int menorValor(int primer, int segundo) {
-        return primer < segundo ? primer : segundo;
-    }
-
-    private int mayorValor(int primer, int segundo) {
-        return primer > segundo ? primer : segundo;
-    }
-
-    private void copiarTablero(Grid tablero_origen, Grid tablero_destino) {
-        int casillas[][] = tablero_origen.toArray();
-        System.out.println("Tablero destino inicio:");
-        tablero_destino.print();
-        for (int fila = 0; fila < tablero_origen.getFilas(); fila++) {
-            for (int col = 0; col < tablero_origen.getColumnas(); col++) {
-                if (tablero_origen.getButton(col, fila) == 1) {
-                    tablero_destino.setButton(col, Conecta4.PLAYER1);
-                } else if (tablero_origen.getButton(col, fila) == -1) {
-                    tablero_destino.setButton(col, Conecta4.PLAYER2);
+    /**
+     * Elige el mejor movimiento para max (jugador humano)
+     *
+     * @param profundidad      Profundidad del nodo
+     * @param estado_del_juego Estado del juego
+     * @return Puesto que esta función será llamada desde algoritmoMinMax y minimizar, devolverá la mejor evaluación
+     * para el estado en el que se encuentra el tablero
+     */
+    private int maximizar(int profundidad, int estado_del_juego) {
+        if (estado_del_juego != 0 || esEmpate()) {
+            return estado_del_juego;
+        } else {
+            int valoracion = PEOR_VALORACION_MAX;
+            int mejor_valoracion = valoracion;
+            int fila;
+            for (int col = 0; col < COLUMNAS; col++) {
+                if (!columnaLlena(col)) {
+                    fila = setFicha(col, Conecta4.PLAYER1);
+                    estado_del_juego = checkWin(fila, col);
+                    valoracion = Math.max(valoracion, minimizar(profundidad++, estado_del_juego));
+                    tablero_copia[fila][col] = Conecta4.VACIO;
+                    if (valoracion >= mejor_valoracion) {
+                        mejor_valoracion = valoracion;
+                    }
                 }
             }
+            return mejor_valoracion;
         }
-        System.out.println("Tablero destino después:");
-        tablero_destino.print();
     }
 
-    // Método para mostrar el estado actual del tablero por la salida estándar
-    private void print(int tablero[][]) {
-        //System.out.println("Conecta-N:");
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                System.out.print(tablero[i][j] + " ");
+    /**
+     * Elige el mejor movimiento para min (jugador IA)
+     *
+     * @param profundidad      Profundidad del nodo
+     * @param estado_del_juego Estado del juego
+     * @return Puesto que esta función será llamada desde maximizar, devolverá la mejor evaluación
+     * para el estado en el que se encuentra el tablero
+     */
+    private int minimizar(int profundidad, int estado_del_juego) {
+        if (estado_del_juego != 0 || esEmpate()) {
+            return estado_del_juego;
+        } else {
+            int valoracion = PEOR_VALORACION_MIN;
+            int mejor_valoracion = valoracion;
+            int fila;
+            for (int col = 0; col < COLUMNAS; col++) {
+                if (!columnaLlena(col)) {
+                    fila = setFicha(col, Conecta4.PLAYER2);
+                    estado_del_juego = checkWin(fila, col);
+                    valoracion = Math.min(valoracion, maximizar(profundidad++, estado_del_juego));
+                    tablero_copia[fila][col] = Conecta4.VACIO;
+                    if (valoracion <= mejor_valoracion) {
+                        mejor_valoracion = valoracion;
+                    }
+                }
+            }
+            return mejor_valoracion;
+        }
+    }
+
+    private boolean columnaLlena(int col) {
+        return tablero_copia[0][col] != Conecta4.VACIO;
+    }
+
+    private int setFicha(int col, int jugador) {
+        int fila = FILAS - 1;
+        while ((fila >= 0) && (tablero_copia[fila][col] != Conecta4.VACIO)) {
+            fila--;
+        }
+        tablero_copia[fila][col] = jugador;
+        return fila;
+    }
+
+    public boolean esEmpate() {
+        for (int i = 0; i < COLUMNAS; i++) {
+            if (tablero_copia[0][i] == Conecta4.VACIO) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void imprimirTablero() {
+        for (int i = 0; i < FILAS; i++) {
+            for (int j = 0; j < COLUMNAS; j++) {
+                System.out.print(tablero_copia[i][j] + " ");
             }
             System.out.println();
         }
         System.out.println();
     }
 
-    public void inicializar(Grid tablero) {
-        for (int fila = 0; fila < tablero.getFilas(); fila++) {
-            for (int col = 0; col < tablero.getColumnas(); col++) {
-                JButton boton = tablero.getJButton(col,fila);
-                boton = new JButton();
-                int celda = tablero.getButton(col,fila) ;
-                celda = 0;
-            }
-        }
+    private void copiarTablero(int tablero_origen[][]) {
+        tablero_copia = new int[FILAS][COLUMNAS];
+        for (int i = 0; i < FILAS; i++)
+            for (int j = 0; j < COLUMNAS; j++)
+                tablero_copia[i][j] = tablero_origen[i][j];
     }
 
+    public int checkWin(int x, int y) {
+        //Comprobar vertical
+        int ganar1 = 0;
+        int ganar2 = 0;
+        int ganador = 0;
+        boolean salir = false;
+        for (int i = 0; (i < FILAS) && !salir; i++) {
+            if (tablero_copia[i][y] != Conecta4.VACIO) {
+                if (tablero_copia[i][y] == Conecta4.PLAYER1) {
+                    ganar1++;
+                } else {
+                    ganar1 = 0;
+                }
+                // Gana el jugador 1
+                if (ganar1 == CONECTA_N) {
+                    ganador = Conecta4.PLAYER1;
+                    salir = true;
+                }
+                if (!salir) {
+                    if (tablero_copia[i][y] == Conecta4.PLAYER2) {
+                        ganar2++;
+                    } else {
+                        ganar2 = 0;
+                    }
+                    // Gana el jugador 2
+                    if (ganar2 == CONECTA_N) {
+                        ganador = Conecta4.PLAYER2;
+                        salir = true;
+                    }
+                }
+            } else {
+                ganar1 = 0;
+                ganar2 = 0;
+            }
+        }
+        // Comprobar horizontal
+        ganar1 = 0;
+        ganar2 = 0;
+        for (int j = 0; (j < COLUMNAS) && !salir; j++) {
+            if (tablero_copia[x][j] != Conecta4.VACIO) {
+                if (tablero_copia[x][j] == Conecta4.PLAYER1) {
+                    ganar1++;
+                } else {
+                    ganar1 = 0;
+                }
+                // Gana el jugador 1
+                if (ganar1 == CONECTA_N) {
+                    ganador = Conecta4.PLAYER1;
+                    salir = true;
+                }
+                if (ganador != Conecta4.PLAYER1) {
+                    if (tablero_copia[x][j] == Conecta4.PLAYER2) {
+                        ganar2++;
+                    } else {
+                        ganar2 = 0;
+                    }
+                    // Gana el jugador 2
+                    if (ganar2 == CONECTA_N) {
+                        ganador = Conecta4.PLAYER2;
+                        salir = true;
+                    }
+                }
+            } else {
+                ganar1 = 0;
+                ganar2 = 0;
+            }
+        }
+        // Comprobar oblicuo. De izquierda a derecha
+        ganar1 = 0;
+        ganar2 = 0;
+        int a = x;
+        int b = y;
+        while (b > 0 && a > 0) {
+            a--;
+            b--;
+        }
+        while (b < COLUMNAS && a < FILAS && !salir) {
+            if (tablero_copia[a][b] != Conecta4.VACIO) {
+                if (tablero_copia[a][b] == Conecta4.PLAYER1) {
+                    ganar1++;
+                } else {
+                    ganar1 = 0;
+                }
+                // Gana el jugador 1
+                if (ganar1 == CONECTA_N) {
+                    ganador = Conecta4.PLAYER1;
+                    salir = true;
+                }
+                if (ganador != Conecta4.PLAYER1) {
+                    if (tablero_copia[a][b] == Conecta4.PLAYER2) {
+                        ganar2++;
+                    } else {
+                        ganar2 = 0;
+                    }
+                    // Gana el jugador 2
+                    if (ganar2 == CONECTA_N) {
+                        ganador = Conecta4.PLAYER2;
+                        salir = true;
+                    }
+                }
+            } else {
+                ganar1 = 0;
+                ganar2 = 0;
+            }
+            a++;
+            b++;
+        }
+        // Comprobar oblicuo de derecha a izquierda
+        ganar1 = 0;
+        ganar2 = 0;
+        a = x;
+        b = y;
+        //buscar posición de la esquina
+        while (b < COLUMNAS - 1 && a > 0) {
+            a--;
+            b++;
+        }
+        while (b > -1 && a < FILAS && !salir) {
+            if (tablero_copia[a][b] != Conecta4.VACIO) {
+                if (tablero_copia[a][b] == Conecta4.PLAYER1) {
+                    ganar1++;
+                } else {
+                    ganar1 = 0;
+                }
+                // Gana el jugador 1
+                if (ganar1 == CONECTA_N) {
+                    ganador = Conecta4.PLAYER1;
+                    salir = true;
+                }
+                if (ganador != Conecta4.PLAYER1) {
+                    if (tablero_copia[a][b] == Conecta4.PLAYER2) {
+                        ganar2++;
+                    } else {
+                        ganar2 = 0;
+                    }
+                    // Gana el jugador 2
+                    if (ganar2 == CONECTA_N) {
+                        ganador = Conecta4.PLAYER2;
+                        salir = true;
+                    }
+                }
+            } else {
+                ganar1 = 0;
+                ganar2 = 0;
+            }
+            a++;
+            b--;
+        }
+        return ganador;
+    }
 }
