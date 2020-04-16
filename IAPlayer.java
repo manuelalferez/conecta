@@ -47,12 +47,10 @@ public class IAPlayer extends Player {
         for (int col = 0; col < COLUMNAS; col++) {
             if (!columnaLlena(col)) {
                 int fila = setFicha(col, Conecta4.PLAYER2);
-                System.out.println("Soy algoritmoMinMax, Columna: " + col);
-                imprimirTablero();
                 int estado_del_juego = checkWin(fila, col);
                 valoracion = maximizar(0, estado_del_juego);
                 tablero_copia[fila][col] = Conecta4.VACIO;
-                System.out.println("Columna " + col + " con valoración: " + valoracion);
+                System.out.println("Columna " + col + ", con valoración: " + valoracion);
                 if (valoracion < mejor_valoracion) {
                     mejor_valoracion = valoracion;
                     mejor_jugada = col;
@@ -64,17 +62,14 @@ public class IAPlayer extends Player {
 
     private int maximizar(int profundidad, int estado_del_juego) {
         if (estado_del_juego != 0 || esEmpate()) {
-            return getValoracion(estado_del_juego);
+            return estado_del_juego;
         } else {
             int valoracion = PEOR_VALORACION_MAX;
             int mejor_valoracion = valoracion;
             int fila;
-            System.out.println("Profundidad: " + profundidad);
             for (int col = 0; col < COLUMNAS; col++) {
                 if (!columnaLlena(col)) {
-                    System.out.println("Soy max, Columna: " + col);
                     fila = setFicha(col, Conecta4.PLAYER1);
-                    imprimirTablero();
                     estado_del_juego = checkWin(fila, col);
                     valoracion = Math.max(valoracion, minimizar(profundidad++, estado_del_juego));
                     tablero_copia[fila][col] = Conecta4.VACIO;
@@ -89,17 +84,14 @@ public class IAPlayer extends Player {
 
     private int minimizar(int profundidad, int estado_del_juego) {
         if (estado_del_juego != 0 || esEmpate()) {
-            return getValoracion(estado_del_juego);
+            return estado_del_juego;
         } else {
             int valoracion = PEOR_VALORACION_MIN;
             int mejor_valoracion = valoracion;
             int fila;
-            System.out.println("Profundidad: " + profundidad);
             for (int col = 0; col < COLUMNAS; col++) {
                 if (!columnaLlena(col)) {
-                     System.out.println("Soy min, Columna: " + col);
                     fila = setFicha(col, Conecta4.PLAYER2);
-                    imprimirTablero();
                     estado_del_juego = checkWin(fila, col);
                     valoracion = Math.min(valoracion, maximizar(profundidad++, estado_del_juego));
                     tablero_copia[fila][col] = Conecta4.VACIO;
@@ -151,22 +143,7 @@ public class IAPlayer extends Player {
                 tablero_copia[i][j] = tablero_origen[i][j];
     }
 
-    private int getValoracion(int estado_de_juego) {
-        switch (estado_de_juego) {
-            case Conecta4.PLAYER1:
-                return 5;
-            case Conecta4.PLAYER2:
-                return -5;
-            default:
-                return 0;
-        }
-    }
-
     public int checkWin(int x, int y) {
-        /*
-         *	x fila
-         *	y columna
-         */
         //Comprobar vertical
         int ganar1 = 0;
         int ganar2 = 0;
@@ -316,5 +293,5 @@ public class IAPlayer extends Player {
         }
 
         return ganador;
-    } // checkWin
+    }
 }
