@@ -11,9 +11,8 @@ import java.io.PrintWriter;
 public class IAPlayer extends Player {
     private final int SIN_JUGADA = -1;
     private int CONECTA_N = 0;
-    private final int SIN_GANADOR = 0;
-    private final int PEOR_VALORACION_MIN = 1;
-    private final int PEOR_VALORACION_MAX = -1;
+    private final int PEOR_VALORACION_MIN = Integer.MAX_VALUE;
+    private final int PEOR_VALORACION_MAX = Integer.MIN_VALUE;
     private int FILAS;
     private int COLUMNAS;
     private int tablero_copia[][];
@@ -36,6 +35,7 @@ public class IAPlayer extends Player {
         System.out.println("Jugada en: " + mejorJugada);
         // escribirLogs();
         //log = VACIAR;
+        //imprimirTablero();
         return tablero.checkWin(tablero.setButton(mejorJugada, Conecta4.PLAYER2), mejorJugada, conecta);
     }
 
@@ -49,7 +49,11 @@ public class IAPlayer extends Player {
         int mejor_valoracion = valoracion;
         for (int col = 0; col < COLUMNAS; col++) {
             if (!columnaLlena(col)) {
-                valoracion = minimizar(0);
+                int fila = setFicha(col, Conecta4.PLAYER2);
+                //imprimirTablero();
+                int estado_del_juego = checkWin(fila, col);
+                valoracion = maximizar(0, estado_del_juego);
+                tablero_copia[fila][col] = Conecta4.VACIO;
                 System.out.println("Columna " + col + " con valoración: " + valoracion);
                 if (valoracion < mejor_valoracion) {
                     mejor_valoracion = valoracion;
@@ -60,9 +64,10 @@ public class IAPlayer extends Player {
         return mejor_jugada;
     }
 
-    private int maximizar(int profundidad) {
-        if (esEmpate()) {
-            return 0;
+    private int maximizar(int profundidad, int estado_del_juego) {
+        if (estado_del_juego != 0 || esEmpate()) {
+            //imprimirTablero();
+            return getValoracion(estado_del_juego);
         } else {
             int valoracion = PEOR_VALORACION_MAX;
             int mejor_valoracion = valoracion;
@@ -73,23 +78,26 @@ public class IAPlayer extends Player {
                 if (!columnaLlena(col)) {
                     //log += "Soy min, Columna: " + col + "\n";
                     //System.out.println("Soy max, Columna: " + col);
-                    fila = setFicha(col, Conecta4.PLAYER2);
+                    fila = setFicha(col, Conecta4.PLAYER1);
                     //imprimirTablero();
-                    int estado_del_juego = checkWin(fila, col);
-                    valoracion = mayorValor(valoracion, minimizar(profundidad++));
+                    estado_del_juego = checkWin(fila, col);
+                    valoracion = Math.max(valoracion, minimizar(profundidad++, estado_del_juego));
                     tablero_copia[fila][col] = Conecta4.VACIO;
                     if (valoracion >= mejor_valoracion) {
                         mejor_valoracion = valoracion;
+                        //return valoracion;
                     }
                 }
             }
+            //imprimirTablero();
             return mejor_valoracion;
         }
     }
 
-    private int minimizar(int profundidad) {
-        if (esEmpate()) {
-            return 0;
+    private int minimizar(int profundidad, int estado_del_juego) {
+        if (estado_del_juego != 0 || esEmpate()) {
+            //imprimirTablero();
+            return getValoracion(estado_del_juego);
         } else {
             int valoracion = PEOR_VALORACION_MIN;
             int mejor_valoracion = valoracion;
@@ -102,14 +110,16 @@ public class IAPlayer extends Player {
                     // System.out.println("Soy min, Columna: " + col);
                     fila = setFicha(col, Conecta4.PLAYER2);
                     //imprimirTablero();
-                    int estado_del_juego = checkWin(fila, col);
-                    valoracion = menorValor(valoracion, maximizar(profundidad++));
+                    estado_del_juego = checkWin(fila, col);
+                    valoracion = Math.min(valoracion, maximizar(profundidad++, estado_del_juego));
                     tablero_copia[fila][col] = Conecta4.VACIO;
                     if (valoracion <= mejor_valoracion) {
                         mejor_valoracion = valoracion;
+                        //return valoracion;
                     }
                 }
             }
+            //imprimirTablero();
             return mejor_valoracion;
         }
     }
@@ -137,23 +147,18 @@ public class IAPlayer extends Player {
         return true;
     }
 
-    private int menorValor(int primer, int segundo) {
-        return primer < segundo ? primer : segundo;
-    }
-
-    private int mayorValor(int primer, int segundo) {
-        return primer > segundo ? primer : segundo;
-    }
-
     // Método para mostrar el estado actual del tablero por la salida estándar
     private void imprimirTablero() {
         for (int i = 0; i < FILAS; i++) {
             for (int j = 0; j < COLUMNAS; j++) {
-                log += tablero_copia[i][j] + " ";
+                //log += tablero_copia[i][j] + " ";
+                System.out.print(tablero_copia[i][j] + " ");
             }
-            log += "\n";
+            //log += "\n";
+            System.out.println();
         }
-        log += "\n";
+        //log += "\n";
+        System.out.println();
     }
 
     private void copiarTablero(int tablero_origen[][]) {
@@ -161,6 +166,17 @@ public class IAPlayer extends Player {
         for (int i = 0; i < FILAS; i++)
             for (int j = 0; j < COLUMNAS; j++)
                 tablero_copia[i][j] = tablero_origen[i][j];
+    }
+
+    private int getValoracion(int estado_de_juego) {
+        switch (estado_de_juego) {
+            case Conecta4.PLAYER1:
+                return 5;
+            case Conecta4.PLAYER2:
+                return -5;
+            default:
+                return 0;
+        }
     }
 
     private void escribirLogs() {
