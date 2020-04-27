@@ -10,6 +10,7 @@ public class IAPlayer extends Player {
     private int CONECTA_N = 0;
     private int FILAS;
     private int COLUMNAS;
+    private final int ES_EMPATE = 2;
 
     private final int PEOR_VALORACION_MIN = Integer.MAX_VALUE;
     private final int PEOR_VALORACION_MAX = Integer.MIN_VALUE;
@@ -155,6 +156,29 @@ public class IAPlayer extends Player {
         for (int i = 0; i < FILAS; i++)
             for (int j = 0; j < COLUMNAS; j++)
                 tablero_copia[i][j] = tablero_origen[i][j];
+    }
+
+    private int getEstadoJuego(int estado_del_juego) {
+        if (estado_del_juego == Conecta4.PLAYER1)
+            return (int) Math.pow(10, 3);
+        else if (estado_del_juego == Conecta4.PLAYER2)
+            return (int) Math.pow(-10, 3);
+        else if(estado_del_juego == ES_EMPATE){
+            return 0;
+        }else{
+            int heuristica_juego = 0;
+            heuristica_juego += getHeuristica(Conecta4.PLAYER1);
+            heuristica_juego += getHeuristica(Conecta4.PLAYER2);
+            return heuristica_juego;
+        }
+    }
+
+    private int getHeuristica(int jugador){
+        for (int col = 0; col < COLUMNAS; col++) {
+            for (int fila = FILAS-1; fila >=0; fila--) {
+                //TODO
+            }
+        }
     }
 
     public int checkWin(int x, int y) {
