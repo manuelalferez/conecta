@@ -38,10 +38,9 @@ public class IAPlayer extends Player {
         COLUMNAS = tablero.getColumnas();
         tablero_copia = copiarTablero(tablero.toArray());
         int mejorJugada = algoritmoMinMax();
-        //log += "Jugada en: " + mejorJugada;
-        System.out.println("Jugada en: " + mejorJugada);
-        //escribirLogs();
-        //log = VACIAR;
+        log += "Jugada en: " + mejorJugada;
+        escribirLogs();
+        log = VACIAR;
         return tablero.checkWin(tablero.setButton(mejorJugada, Conecta4.PLAYER2), mejorJugada, conecta);
     }
 
@@ -59,7 +58,8 @@ public class IAPlayer extends Player {
                 int estado_del_juego = checkWin(fila, col);
                 valoracion = maximizar(0, estado_del_juego);
                 tablero_copia[fila][col] = Conecta4.VACIO;
-                System.out.println("Columna " + col + ", con valoración: " + valoracion);
+                log += "Soy minmax\n";
+                log += "Columna " + col + ", con valoración: " + valoracion;
                 if (valoracion < mejor_valoracion) {
                     mejor_valoracion = valoracion;
                     mejor_jugada = col;
@@ -84,12 +84,10 @@ public class IAPlayer extends Player {
             int valoracion = PEOR_VALORACION_MAX;
             int mejor_valoracion = valoracion;
             int fila;
-            //log += "Profundidad: " + profundidad + "\n";
-            System.out.println("Profundidad: " + profundidad + "\n");
+            log += "Profundidad: " + profundidad + "\n";
             for (int col = 0; col < COLUMNAS; col++) {
                 if (!columnaLlena(col)) {
-                    //log += "Soy max, Columna: " + col + "\n";
-                    System.out.println("Soy max, Columna: " + col + "\n");
+                    log += "Soy max, Columna: " + col + "\n";
                     fila = setFicha(col, Conecta4.PLAYER1);
                     imprimirTablero();
                     estado_del_juego = checkWin(fila, col);
@@ -119,12 +117,10 @@ public class IAPlayer extends Player {
             int valoracion = PEOR_VALORACION_MIN;
             int mejor_valoracion = valoracion;
             int fila;
-            //log += "Profundidad: " + profundidad + "\n";
-            System.out.println("Profundidad: " + profundidad + "\n");
+            log += "Profundidad: " + profundidad + "\n";
             for (int col = 0; col < COLUMNAS; col++) {
                 if (!columnaLlena(col)) {
-                    //log += "Soy min, Columna: " + col + "\n";
-                    System.out.println("Soy min, Columna: " + col + "\n");
+                    log += "Soy min, Columna: " + col + "\n";
                     fila = setFicha(col, Conecta4.PLAYER2);
                     imprimirTablero();
                     estado_del_juego = checkWin(fila, col);
@@ -166,15 +162,11 @@ public class IAPlayer extends Player {
     private void imprimirTablero() {
         for (int i = 0; i < FILAS; i++) {
             for (int j = 0; j < COLUMNAS; j++) {
-                //log += tablero_copia[i][j] + " ";
-                System.out.print(tablero_copia[i][j] + " ");
+                log += tablero_copia[i][j] + " ";
             }
-            //log += "\n";
-            System.out.println();
-
+            log += "\n";
         }
-        //log += "\n";
-        System.out.println();
+        log += "\n";
     }
 
     private int[][] copiarTablero(int tablero_origen[][]) {
