@@ -6,11 +6,12 @@ package conecta4;
  */
 public class IAPlayer extends Player {
     // Constantes
+    private final int MAX_PROFUNDIDAD = 8;
     private final int SIN_JUGADA = -1;
     private int CONECTA_N = 0;
     private int FILAS;
     private int COLUMNAS;
-    private final int ES_EMPATE = 2;
+    private boolean ES_EMPATE = false;
     private final int FICHA_PROVISIONAL = 2;
 
     private final int PEOR_VALORACION_MIN = Integer.MAX_VALUE;
@@ -70,8 +71,8 @@ public class IAPlayer extends Player {
      * para el estado en el que se encuentra el tablero
      */
     private int maximizar(int profundidad, int estado_del_juego) {
-        if (estado_del_juego != 0 || esEmpate()) {
-            return estado_del_juego;
+        if (estado_del_juego != 0 || esEmpate() || profundidad == MAX_PROFUNDIDAD) {
+            return getEstadoJuego(estado_del_juego);
         } else {
             int valoracion = PEOR_VALORACION_MAX;
             int mejor_valoracion = valoracion;
@@ -100,8 +101,8 @@ public class IAPlayer extends Player {
      * para el estado en el que se encuentra el tablero
      */
     private int minimizar(int profundidad, int estado_del_juego) {
-        if (estado_del_juego != 0 || esEmpate()) {
-            return estado_del_juego;
+        if (estado_del_juego != 0 || esEmpate() || profundidad == MAX_PROFUNDIDAD) {
+            return getEstadoJuego(estado_del_juego);
         } else {
             int valoracion = PEOR_VALORACION_MIN;
             int mejor_valoracion = valoracion;
@@ -137,9 +138,11 @@ public class IAPlayer extends Player {
     public boolean esEmpate() {
         for (int i = 0; i < COLUMNAS; i++) {
             if (tablero_copia[0][i] == Conecta4.VACIO) {
+                ES_EMPATE = false;
                 return false;
             }
         }
+        ES_EMPATE = true;
         return true;
     }
 
@@ -166,7 +169,7 @@ public class IAPlayer extends Player {
             return (int) Math.pow(10, 3);
         else if (estado_del_juego == Conecta4.PLAYER2)
             return (int) Math.pow(-10, 3);
-        else if (estado_del_juego == ES_EMPATE) {
+        else if (ES_EMPATE) {
             return 0;
         } else {
             int heuristica_juego = 0;
@@ -184,6 +187,7 @@ public class IAPlayer extends Player {
         heuristica += getHeuristicaColumnas(jugador);
         heuristica += getHeuristicaDiagonalPositiva(jugador);
         heuristica += getHeuristicaDiagonalNegativa(jugador);
+        return heuristica;
     }
 
     private void rellenarTableroHeuristico() {
@@ -245,36 +249,76 @@ public class IAPlayer extends Player {
 
     private int getHeuristicaDiagonalPositiva(int jugador) {
         int heuristica = 0;
-        int lim_fila = CONECTA_N - 1; // N - 1
+        int fila = CONECTA_N - 1; // N - 1
         int lim_col = COLUMNAS - (CONECTA_N - 1); // COLUMNAS - (N-1)
-        int fila = lim_fila;
         int col = 0;
         do {
-            for (int i = fila; i >= 0; i--) {
-                for (int j = 0; j < COLUMNAS; j++) {
-                    if (conecta == CONECTA_N) {
-                        heuristica += (int) Math.pow(10, fichas);
-                        break;
+            int a = fila;
+            int b = col;
+            int conecta = 0;
+            int fichas = 0;
+            do {
+                if (conecta == CONECTA_N) {
+                    heuristica += (int) Math.pow(10, fichas);
+                    break;
+                } else {
+                    if (tablero_heuristico[a][b] == jugador) {
+                        fichas++;
+                        conecta++;
+                    } else if (tablero_heuristico[a][b] == FICHA_PROVISIONAL) {
+                        conecta++;
                     } else {
-                        if (tablero_heuristico[col][fila] == jugador) {
-                            fichas++;
-                            conecta++;
-                        } else if (tablero_heuristico[col][fila] == FICHA_PROVISIONAL) {
-                            conecta++;
-                        } else {
-                            conecta = 0;
-                            fichas = 0;
-                        }
+                        conecta = 0;
+                        fichas = 0;
                     }
                 }
-            }
+                a--;
+                b++;
+            } while (a >= 0 && b < COLUMNAS);
 
-        } while ()
+            if (fila < FILAS - 1)
+                fila++;
+            else
+                col++;
+        } while (col <= lim_col);
         return heuristica;
     }
 
     private int getHeuristicaDiagonalNegativa(int jugador) {
+        int heuristica = 0;
+        int fila = FILAS - 1;
+        int col = CONECTA_N - 1; // N - 1
+        int lim_fil = CONECTA_N - 1; // N - 1
+        do {
+            int a = fila;
+            int b = col;
+            int conecta = 0;
+            int fichas = 0;
+            do {
+                if (conecta == CONECTA_N) {
+                    heuristica += (int) Math.pow(10, fichas);
+                    break;
+                } else {
+                    if (tablero_heuristico[a][b] == jugador) {
+                        fichas++;
+                        conecta++;
+                    } else if (tablero_heuristico[a][b] == FICHA_PROVISIONAL) {
+                        conecta++;
+                    } else {
+                        conecta = 0;
+                        fichas = 0;
+                    }
+                }
+                a--;
+                b--;
+            } while (a >= 0 && b >= 0);
 
+            if (col < COLUMNAS)
+                col++;
+            else
+                fila--;
+        } while (fila <= lim_fil);
+        return heuristica;
     }
 
     public int checkWin(int x, int y) {
