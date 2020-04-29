@@ -182,9 +182,9 @@ public class IAPlayer extends Player {
 
     private int getEstadoJuego(int estado_del_juego) {
         if (estado_del_juego == Conecta4.PLAYER1)
-            return (int) Math.pow(10, 3);
+            return 200+((int) Math.pow(10, 3));
         else if (estado_del_juego == Conecta4.PLAYER2)
-            return (int) Math.pow(-10, 3);
+            return 200+((int) Math.pow(-10, 3));
         else if (ES_EMPATE) {
             return 0;
         } else {
@@ -328,11 +328,11 @@ public class IAPlayer extends Player {
                 }
             } while (a >= 0 && b >= 0);
 
-            if (col < COLUMNAS)
+            if (col < COLUMNAS - 1)
                 col++;
             else
                 fila--;
-        } while (fila <= lim_fil && col < COLUMNAS);
+        } while (fila >= lim_fil);
         return heuristica;
     }
 
