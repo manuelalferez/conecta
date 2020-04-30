@@ -297,27 +297,33 @@ public class IAPlayer extends Player {
             int a = fila;
             int b = col;
             int conecta = 0;
+            int max_fichas = 0;
             int fichas = 0;
+            int caducidad = 0;
             do {
-                if (tablero_heuristico[a][b] == jugador) {
+                if (tablero_heuristico[fila][col] == jugador) {
+                    if (fichas == 0) {
+                        caducidad = CONECTA_N - 1;
+                    }
                     fichas++;
                     conecta++;
-                } else if (tablero_heuristico[a][b] == FICHA_PROVISIONAL) {
+                } else if (tablero_heuristico[fila][col] == FICHA_PROVISIONAL) {
                     conecta++;
-                    if (conecta >= CONECTA_N && fichas > 0) {
-                        heuristica += (int) Math.pow(10, fichas);
-                        break;
-                    }
                 } else {
                     conecta = 0;
                     fichas = 0;
                 }
+                if (conecta >= CONECTA_N && fichas > max_fichas) {
+                    max_fichas = fichas;
+                    System.out.println("Max fichas ahora es: " + max_fichas);
+                }
+                if (caducidad == 0 && fichas != 0) {
+                    fichas--;
+                } else if (fichas >= 1) {
+                    caducidad--;
+                }
                 a--;
                 b++;
-                if (conecta == CONECTA_N && fichas == 3) {
-                    heuristica += (int) Math.pow(10, fichas);
-                    break;
-                }
             } while (a >= 0 && b < COLUMNAS);
 
             if (fila < FILAS - 1)
@@ -337,28 +343,34 @@ public class IAPlayer extends Player {
             int a = fila;
             int b = col;
             int conecta = 0;
+            int max_fichas = 0;
             int fichas = 0;
+            int caducidad = 0;
             do {
-                if (tablero_heuristico[a][b] == jugador) {
+                if (tablero_heuristico[fila][col] == jugador) {
+                    if (fichas == 0) {
+                        caducidad = CONECTA_N - 1;
+                    }
                     fichas++;
                     conecta++;
-                } else if (tablero_heuristico[a][b] == FICHA_PROVISIONAL) {
+                } else if (tablero_heuristico[fila][col] == FICHA_PROVISIONAL) {
                     conecta++;
-                    if (conecta >= CONECTA_N && fichas > 0) {
-                        heuristica += (int) Math.pow(10, fichas);
-                        break;
-                    }
                 } else {
                     conecta = 0;
                     fichas = 0;
                 }
+                if (conecta >= CONECTA_N && fichas > max_fichas) {
+                    max_fichas = fichas;
+                    System.out.println("Max fichas ahora es: " + max_fichas);
+                }
+                if (caducidad == 0 && fichas != 0) {
+                    fichas--;
+                } else if (fichas >= 1) {
+                    caducidad--;
+                }
 
                 a--;
                 b--;
-                if (conecta == CONECTA_N && fichas == 3) {
-                    heuristica += (int) Math.pow(10, fichas);
-                    break;
-                }
             } while (a >= 0 && b >= 0);
 
             if (col < COLUMNAS - 1)
