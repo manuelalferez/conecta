@@ -196,7 +196,9 @@ public class IAPlayer extends Player {
             int heuristica_juego = 0;
             tablero_heuristico = copiarTablero(tablero_copia);
             rellenarTableroHeuristico();
+            System.out.println("Jugador: 1 ");
             heuristica_juego += getHeuristica(Conecta4.PLAYER1);
+            System.out.println("Jugador: -1 ");
             heuristica_juego -= getHeuristica(Conecta4.PLAYER2);
             System.out.println("Estado del tablero: " + heuristica_juego);
             return heuristica_juego;
@@ -227,26 +229,34 @@ public class IAPlayer extends Player {
         int heuristica = 0;
         for (int fila = FILAS - 1; fila >= 0; fila--) {
             int conecta = 0;
+            int max_fichas = 0;
             int fichas = 0;
+            int caducidad = 0;
             for (int col = 0; col < COLUMNAS; col++) {
                 if (tablero_heuristico[fila][col] == jugador) {
+                    if (fichas == 0) {
+                        caducidad = CONECTA_N - 1;
+                    }
                     fichas++;
                     conecta++;
                 } else if (tablero_heuristico[fila][col] == FICHA_PROVISIONAL) {
                     conecta++;
-                    if (conecta >= CONECTA_N && fichas > 0) {
-                        heuristica += pow(10, fichas);
-                        break;
-                    }
                 } else {
                     conecta = 0;
                     fichas = 0;
                 }
-
-                if (conecta == CONECTA_N && fichas == 3) {
-                    heuristica += pow(10, fichas);
-                    break;
+                if (conecta >= CONECTA_N && fichas > max_fichas) {
+                    max_fichas = fichas;
+                    System.out.println("Max fichas ahora es: " + max_fichas);
                 }
+                if (caducidad == 0 && fichas != 0) {
+                    fichas--;
+                } else if (fichas >= 1) {
+                    caducidad--;
+                }
+            }
+            if (max_fichas != 0) {
+                heuristica += (int) Math.pow(10, max_fichas);
             }
         }
         return heuristica;
@@ -295,7 +305,7 @@ public class IAPlayer extends Player {
                 } else if (tablero_heuristico[a][b] == FICHA_PROVISIONAL) {
                     conecta++;
                     if (conecta >= CONECTA_N && fichas > 0) {
-                        heuristica += pow(10, fichas);
+                        heuristica += (int) Math.pow(10, fichas);
                         break;
                     }
                 } else {
@@ -305,7 +315,7 @@ public class IAPlayer extends Player {
                 a--;
                 b++;
                 if (conecta == CONECTA_N && fichas == 3) {
-                    heuristica += pow(10, fichas);
+                    heuristica += (int) Math.pow(10, fichas);
                     break;
                 }
             } while (a >= 0 && b < COLUMNAS);
@@ -335,7 +345,7 @@ public class IAPlayer extends Player {
                 } else if (tablero_heuristico[a][b] == FICHA_PROVISIONAL) {
                     conecta++;
                     if (conecta >= CONECTA_N && fichas > 0) {
-                        heuristica += pow(10, fichas);
+                        heuristica += (int) Math.pow(10, fichas);
                         break;
                     }
                 } else {
@@ -346,7 +356,7 @@ public class IAPlayer extends Player {
                 a--;
                 b--;
                 if (conecta == CONECTA_N && fichas == 3) {
-                    heuristica += pow(10, fichas);
+                    heuristica += (int) Math.pow(10, fichas);
                     break;
                 }
             } while (a >= 0 && b >= 0);
@@ -357,13 +367,6 @@ public class IAPlayer extends Player {
                 fila--;
         } while (fila >= lim_fil);
         return heuristica;
-    }
-
-    int pow(int base, int exponent) {
-        if (exponent == 0) return 1;
-        if (exponent == 1) return base;
-        if (exponent % 2 == 0) return pow(base * base, exponent / 2); //even a=(a^2)^b/2
-        else return base * pow(base * base, exponent / 2); //odd  a=a*(a^2)^b/2
     }
 
     private void escribirLogs() {
