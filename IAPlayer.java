@@ -254,19 +254,20 @@ public class IAPlayer extends Player {
             int conecta = 0;
             int fichas = 0;
             for (int fila = FILAS - 1; fila >= 0; fila--) {
+                if (tablero_heuristico[fila][col] == jugador) {
+                    fichas++;
+                    conecta++;
+                } else if (tablero_heuristico[fila][col] == FICHA_PROVISIONAL) {
+                    conecta++;
+                } else {
+                    conecta = 0;
+                    fichas = 0;
+                }
+
                 if (conecta == CONECTA_N && fichas > 0) {
                     heuristica += (int) Math.pow(10, fichas);
+                    System.out.println("Vertical: " + heuristica);
                     break;
-                } else {
-                    if (tablero_heuristico[fila][col] == jugador) {
-                        fichas++;
-                        conecta++;
-                    } else if (tablero_heuristico[fila][col] == FICHA_PROVISIONAL) {
-                        conecta++;
-                    } else {
-                        conecta = 0;
-                        fichas = 0;
-                    }
                 }
             }
         }
@@ -297,7 +298,7 @@ public class IAPlayer extends Player {
                 b++;
                 if (conecta == CONECTA_N && fichas > 0) {
                     heuristica += (int) Math.pow(10, fichas);
-                    System.out.println("Estado del tablero diagonal positiva: " + heuristica);
+                    System.out.println("Diagonal positiva: " + heuristica);
                     break;
                 }
             } while (a >= 0 && b < COLUMNAS);
