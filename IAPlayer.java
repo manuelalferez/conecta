@@ -87,12 +87,9 @@ public class IAPlayer extends Player {
             int valoracion = PEOR_VALORACION_MAX;
             int mejor_valoracion = valoracion;
             int fila;
-            //System.out.println("Profundidad: " + profundidad + "\n");
             for (int col = 0; col < COLUMNAS; col++) {
                 if (!columnaLlena(col)) {
-                    //System.out.println("Soy max, Columna: " + col + "\n");
                     fila = setFicha(col, Conecta4.PLAYER1);
-                    //imprimirTablero();
                     estado_del_juego = checkWin(fila, col);
                     valoracion = Math.max(valoracion, minimizar(profundidad++, estado_del_juego));
                     tablero_copia[fila][col] = Conecta4.VACIO;
@@ -120,12 +117,9 @@ public class IAPlayer extends Player {
             int valoracion = PEOR_VALORACION_MIN;
             int mejor_valoracion = valoracion;
             int fila;
-            //System.out.println("Profundidad: " + profundidad + "\n");
             for (int col = 0; col < COLUMNAS; col++) {
                 if (!columnaLlena(col)) {
-                    //System.out.println("Soy min, Columna: " + col + "\n");
                     fila = setFicha(col, Conecta4.PLAYER2);
-                    //imprimirTablero();
                     estado_del_juego = checkWin(fila, col);
                     valoracion = Math.min(valoracion, maximizar(profundidad++, estado_del_juego));
                     tablero_copia[fila][col] = Conecta4.VACIO;
@@ -181,26 +175,19 @@ public class IAPlayer extends Player {
     }
 
     private int getEstadoJuego(int estado_del_juego) {
-        System.out.println("----------------------------");
         imprimirTablero();
         if (estado_del_juego == Conecta4.PLAYER1) {
-            System.out.println("Estado del tablero: 10000 ");
             return (int) Math.pow(10, CONECTA_N);
         } else if (estado_del_juego == Conecta4.PLAYER2) {
-            System.out.println("Estado del tablero: -10000");
             return -(int) Math.pow(10, CONECTA_N);
         } else if (ES_EMPATE) {
-            System.out.println("Estado del tablero: 0");
             return 0;
         } else {
             int heuristica_juego = 0;
             tablero_heuristico = copiarTablero(tablero_copia);
             rellenarTableroHeuristico();
-            System.out.println("Jugador: 1 ");
             heuristica_juego += getHeuristica(Conecta4.PLAYER1);
-            System.out.println("Jugador: -1 ");
             heuristica_juego -= getHeuristica(Conecta4.PLAYER2);
-            System.out.println("Estado del tablero: " + heuristica_juego);
             return heuristica_juego;
         }
     }
@@ -208,13 +195,9 @@ public class IAPlayer extends Player {
     private int getHeuristica(int jugador) {
         int heuristica = 0;
         heuristica += getHeuristicaHorizontal(jugador);
-        System.out.println("Estado del tablero horizontal: " + heuristica);
         heuristica += getHeuristicaVertical(jugador);
-        System.out.println("Estado del tablero vertical: " + heuristica);
         heuristica += getHeuristicaDiagonalPositiva(jugador);
-        System.out.println("Estado del tablero diagonal positiva: " + heuristica);
         heuristica += getHeuristicaDiagonalNegativa(jugador);
-        System.out.println("Estado del tablero diagonal negativa: " + heuristica);
         return heuristica;
     }
 
@@ -247,7 +230,6 @@ public class IAPlayer extends Player {
                 }
                 if (conecta >= CONECTA_N && fichas > max_fichas) {
                     max_fichas = fichas;
-                    System.out.println("Max fichas ahora es: " + max_fichas);
                 }
                 if (caducidad == 0 && fichas != 0) {
                     fichas--;
@@ -280,7 +262,6 @@ public class IAPlayer extends Player {
 
                 if (conecta == CONECTA_N && fichas > 0) {
                     heuristica += (int) Math.pow(10, fichas);
-                    // System.out.println("Vertical: " + heuristica);
                     break;
                 }
             }
@@ -315,7 +296,6 @@ public class IAPlayer extends Player {
                 }
                 if (conecta >= CONECTA_N && fichas > max_fichas) {
                     max_fichas = fichas;
-                    System.out.println("Max fichas ahora es: " + max_fichas);
                 }
                 if (caducidad == 0 && fichas != 0) {
                     fichas--;
@@ -365,7 +345,6 @@ public class IAPlayer extends Player {
                 }
                 if (conecta >= CONECTA_N && fichas > max_fichas) {
                     max_fichas = fichas;
-                    System.out.println("Max fichas ahora es: " + max_fichas);
                 }
                 if (caducidad == 0 && fichas != 0) {
                     fichas--;
@@ -387,27 +366,6 @@ public class IAPlayer extends Player {
                 fila--;
         } while (fila >= lim_fil);
         return heuristica;
-    }
-
-    private void escribirLogs() {
-        FileWriter fichero = null;
-        PrintWriter pw;
-        try {
-            fichero = new FileWriter("log.txt", true);
-            pw = new PrintWriter(fichero);
-            pw.println(log);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                // Para asegurarnos que se cierra el fichero
-                if (null != fichero)
-                    fichero.close();
-            } catch (Exception e2) {
-                e2.printStackTrace();
-            }
-        }
     }
 
     public int checkWin(int x, int y) {
