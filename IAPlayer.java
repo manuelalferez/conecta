@@ -175,7 +175,6 @@ public class IAPlayer extends Player {
     }
 
     private int getEstadoJuego(int estado_del_juego) {
-        imprimirTablero();
         if (estado_del_juego == Conecta4.PLAYER1) {
             return (int) Math.pow(10, CONECTA_N);
         } else if (estado_del_juego == Conecta4.PLAYER2) {
