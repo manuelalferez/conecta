@@ -1,8 +1,5 @@
 package conecta4;
 
-import java.io.FileWriter;
-import java.io.PrintWriter;
-
 /**
  * Esta clase representa la inteligencia artificial cuyo objetivo es ganar a su adversario humano.
  * IAPlayer realizará aquellos movimiento con menor valor.
@@ -56,7 +53,7 @@ public class IAPlayer extends Player {
             if (!columnaLlena(col)) {
                 int fila = setFicha(col, Conecta4.PLAYER2);
                 int estado_del_juego = checkWin(fila, col);
-                valoracion = maximizar(0, estado_del_juego);
+                valoracion = maximizar(estado_del_juego, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
                 tablero_copia[fila][col] = Conecta4.VACIO;
                 System.out.println("Columna " + col + ", con valoración: " + valoracion);
                 if (valoracion < mejor_valoracion) {
@@ -71,60 +68,60 @@ public class IAPlayer extends Player {
     /**
      * Elige el mejor movimiento para max (jugador humano)
      *
-     * @param profundidad      Profundidad del nodo
      * @param estado_del_juego Estado del juego
+     * @param profundidad      Profundidad del nodo
+     * @param alfa
+     * @param beta
      * @return Puesto que esta función será llamada desde algoritmoMinMax y minimizar, devolverá la mejor evaluación
      * para el estado en el que se encuentra el tablero
      */
-    private int maximizar(int profundidad, int estado_del_juego) {
+    private int maximizar(int estado_del_juego, int profundidad, int alfa, int beta) {
         if (estado_del_juego != 0 || esEmpate() || profundidad > MAX_PROFUNDIDAD) {
             return getEstadoJuego(estado_del_juego);
         } else {
-            int valoracion = PEOR_VALORACION_MAX;
-            int mejor_valoracion = valoracion;
-            int fila;
             for (int col = 0; col < COLUMNAS; col++) {
                 if (!columnaLlena(col)) {
-                    fila = setFicha(col, Conecta4.PLAYER1);
+                    int fila = setFicha(col, Conecta4.PLAYER1);
                     estado_del_juego = checkWin(fila, col);
-                    valoracion = Math.max(valoracion, minimizar(profundidad++, estado_del_juego));
+                    alfa = Math.max(alfa, minimizar(estado_del_juego, profundidad++, alfa, beta));
                     tablero_copia[fila][col] = Conecta4.VACIO;
-                    if (valoracion >= mejor_valoracion) {
-                        mejor_valoracion = valoracion;
+                    if (alfa >= beta) {
+                        //System.out.println("Poda en maximizar. Alfa: " + alfa + " Beta: " + beta);
+                        return alfa;
                     }
                 }
             }
-            return mejor_valoracion;
+            return alfa;
         }
     }
 
     /**
      * Elige el mejor movimiento para min (jugador IA)
      *
-     * @param profundidad      Profundidad del nodo
      * @param estado_del_juego Estado del juego
+     * @param profundidad      Profundidad del nodo
+     * @param alfa
+     * @param beta
      * @return Puesto que esta función será llamada desde maximizar, devolverá la mejor evaluación
      * para el estado en el que se encuentra el tablero
      */
-    private int minimizar(int profundidad, int estado_del_juego) {
+    private int minimizar(int estado_del_juego, int profundidad, int alfa, int beta) {
         if (estado_del_juego != 0 || esEmpate() || profundidad > MAX_PROFUNDIDAD) {
             return getEstadoJuego(estado_del_juego);
         } else {
-            int valoracion = PEOR_VALORACION_MIN;
-            int mejor_valoracion = valoracion;
-            int fila;
             for (int col = 0; col < COLUMNAS; col++) {
                 if (!columnaLlena(col)) {
-                    fila = setFicha(col, Conecta4.PLAYER2);
+                    int fila = setFicha(col, Conecta4.PLAYER2);
                     estado_del_juego = checkWin(fila, col);
-                    valoracion = Math.min(valoracion, maximizar(profundidad++, estado_del_juego));
+                    beta = Math.min(beta, maximizar(estado_del_juego, profundidad++, alfa, beta));
                     tablero_copia[fila][col] = Conecta4.VACIO;
-                    if (valoracion <= mejor_valoracion) {
-                        mejor_valoracion = valoracion;
+                    if (beta <= alfa) {
+                        //System.out.println("Poda en minimizar. Alfa: " + alfa + " Beta: " + beta);
+                        return beta;
                     }
                 }
             }
-            return mejor_valoracion;
+            return beta;
         }
     }
 
