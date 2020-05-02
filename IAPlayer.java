@@ -15,16 +15,12 @@ public class IAPlayer extends Player {
     private int FILAS;
     private int COLUMNAS;
     private boolean ES_EMPATE = false;
-    private final int FICHA_PROVISIONAL = 2;
-    private final static String VACIAR = "";
 
     private final int PEOR_VALORACION_MIN = Integer.MAX_VALUE;
     private final int PEOR_VALORACION_MAX = Integer.MIN_VALUE;
 
     // Tablero usado para construir el árbol
     private int tablero_copia[][];
-    private int tablero_heuristico[][];
-    String log = "";
 
     /**
      * @param tablero Representación del tablero de juego
@@ -183,8 +179,6 @@ public class IAPlayer extends Player {
             return 0;
         } else {
             int heuristica_juego = 0;
-            tablero_heuristico = copiarTablero(tablero_copia);
-            rellenarTableroHeuristico();
             heuristica_juego += getHeuristica(Conecta4.PLAYER1);
             heuristica_juego -= getHeuristica(Conecta4.PLAYER2);
             return heuristica_juego;
@@ -200,13 +194,6 @@ public class IAPlayer extends Player {
         return heuristica;
     }
 
-    private void rellenarTableroHeuristico() {
-        for (int i = 0; i < FILAS; i++)
-            for (int j = 0; j < COLUMNAS; j++)
-                if (tablero_heuristico[i][j] == Conecta4.VACIO)
-                    tablero_heuristico[i][j] = FICHA_PROVISIONAL;
-    }
-
     private int getHeuristicaHorizontal(int jugador) {
         int heuristica = 0;
         for (int fila = FILAS - 1; fila >= 0; fila--) {
@@ -215,13 +202,13 @@ public class IAPlayer extends Player {
             int fichas = 0;
             int caducidad = 0;
             for (int col = 0; col < COLUMNAS; col++) {
-                if (tablero_heuristico[fila][col] == jugador) {
+                if (tablero_copia[fila][col] == jugador) {
                     if (fichas == 0) {
                         caducidad = CONECTA_N - 1;
                     }
                     fichas++;
                     conecta++;
-                } else if (tablero_heuristico[fila][col] == FICHA_PROVISIONAL) {
+                } else if (tablero_copia[fila][col] == Conecta4.VACIO) {
                     conecta++;
                 } else {
                     conecta = 0;
@@ -249,10 +236,10 @@ public class IAPlayer extends Player {
             int conecta = 0;
             int fichas = 0;
             for (int fila = FILAS - 1; fila >= 0; fila--) {
-                if (tablero_heuristico[fila][col] == jugador) {
+                if (tablero_copia[fila][col] == jugador) {
                     fichas++;
                     conecta++;
-                } else if (tablero_heuristico[fila][col] == FICHA_PROVISIONAL) {
+                } else if (tablero_copia[fila][col] == Conecta4.VACIO) {
                     conecta++;
                 } else {
                     conecta = 0;
@@ -281,13 +268,13 @@ public class IAPlayer extends Player {
             int fichas = 0;
             int caducidad = 0;
             do {
-                if (tablero_heuristico[a][b] == jugador) {
+                if (tablero_copia[a][b] == jugador) {
                     if (fichas == 0) {
                         caducidad = CONECTA_N - 1;
                     }
                     fichas++;
                     conecta++;
-                } else if (tablero_heuristico[a][b] == FICHA_PROVISIONAL) {
+                } else if (tablero_copia[a][b] == Conecta4.VACIO) {
                     conecta++;
                 } else {
                     conecta = 0;
@@ -330,13 +317,13 @@ public class IAPlayer extends Player {
             int fichas = 0;
             int caducidad = 0;
             do {
-                if (tablero_heuristico[a][b] == jugador) {
+                if (tablero_copia[a][b] == jugador) {
                     if (fichas == 0) {
                         caducidad = CONECTA_N - 1;
                     }
                     fichas++;
                     conecta++;
-                } else if (tablero_heuristico[a][b] == FICHA_PROVISIONAL) {
+                } else if (tablero_copia[a][b] == Conecta4.VACIO) {
                     conecta++;
                 } else {
                     conecta = 0;
