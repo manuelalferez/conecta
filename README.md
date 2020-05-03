@@ -1,6 +1,6 @@
   # Conecta N
 
-![](https://github.com/manuelalferez/inteligenciaArtificial-practica4/tree/master/images/1)
+![](https://github.com/manuelalferez/inteligenciaArtificial-practica4/tree/master/images/1.png)
 
 
 
@@ -24,4 +24,4 @@ Implementar una IA aplicando una poda `alfa-beta`, que sea capaz de ganar al adv
 
 Para la construcción del algoritmo, resulta de especial ayuda una visualización como la que sigue, para plantear mejor una solución: 
 
-![](https://github.com/manuelalferez/inteligenciaArtificial-practica4/tree/master/images/2)
+![](https://github.com/manuelalferez/inteligenciaArtificial-practica4/tree/master/images/2.png)
