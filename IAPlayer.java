@@ -11,13 +11,10 @@ public class IAPlayer extends Player {
     private int CONECTA_N = 0;
     private int FILAS;
     private int COLUMNAS;
-    private boolean ES_EMPATE = false;
-
-    private final int PEOR_VALORACION_MIN = Integer.MAX_VALUE;
-    private final int PEOR_VALORACION_MAX = Integer.MIN_VALUE;
 
     // Tablero usado para construir el árbol
     private int tablero_copia[][];
+    private boolean ES_EMPATE = false;
 
     /**
      * @param tablero Representación del tablero de juego
@@ -47,7 +44,7 @@ public class IAPlayer extends Player {
      */
     private int algoritmoMinMax() {
         int mejor_jugada = SIN_JUGADA;
-        int valoracion = PEOR_VALORACION_MIN;
+        int valoracion = Integer.MAX_VALUE;
         int mejor_valoracion = valoracion;
         for (int col = 0; col < COLUMNAS; col++) {
             if (!columnaLlena(col)) {
@@ -70,8 +67,8 @@ public class IAPlayer extends Player {
      *
      * @param estado_del_juego Estado del juego
      * @param profundidad      Profundidad del nodo
-     * @param alfa
-     * @param beta
+     * @param alfa             La mayor heurística que PLAYER1 escogerá
+     * @param beta             La menor heurística que PLAYER2 escogerá
      * @return Puesto que esta función será llamada desde algoritmoMinMax y minimizar, devolverá la mejor evaluación
      * para el estado en el que se encuentra el tablero
      */
@@ -86,7 +83,6 @@ public class IAPlayer extends Player {
                     alfa = Math.max(alfa, minimizar(estado_del_juego, profundidad++, alfa, beta));
                     tablero_copia[fila][col] = Conecta4.VACIO;
                     if (alfa >= beta) {
-                        //System.out.println("Poda en maximizar. Alfa: " + alfa + " Beta: " + beta);
                         return alfa;
                     }
                 }
@@ -100,8 +96,8 @@ public class IAPlayer extends Player {
      *
      * @param estado_del_juego Estado del juego
      * @param profundidad      Profundidad del nodo
-     * @param alfa
-     * @param beta
+     * @param alfa             La mayor heurística que PLAYER1 escogerá
+     * @param beta             La menor heurística que PLAYER2 escogerá
      * @return Puesto que esta función será llamada desde maximizar, devolverá la mejor evaluación
      * para el estado en el que se encuentra el tablero
      */
@@ -116,7 +112,6 @@ public class IAPlayer extends Player {
                     beta = Math.min(beta, maximizar(estado_del_juego, profundidad++, alfa, beta));
                     tablero_copia[fila][col] = Conecta4.VACIO;
                     if (beta <= alfa) {
-                        //System.out.println("Poda en minimizar. Alfa: " + alfa + " Beta: " + beta);
                         return beta;
                     }
                 }
@@ -167,6 +162,18 @@ public class IAPlayer extends Player {
         return tablero_destino;
     }
 
+    /**
+     * Devuelve una heurística para el tablero_copia. Hay 4 casos:
+     * - Si el tablero se encuentra en un nodo hoja (un estado final), devuelve una heurística asociada
+     * dependiendo si ha ganador PLAYER1 (10000), PLAYER2 (-10000) o se ha empatado (0)
+     * - El último caso se da cuando la partida no tiene un claro ganador. En este caso se devuelve una
+     * heurística en función del número de fichas consecutivas con posibles CONECTA N (si se puede llegar
+     * a una victoria por alguna de las partes). Esa heurística se calcula en función:
+     * 10^(número de fichas consecutivas, o no, pero con posibilidad de unirse en un CONECTA N)
+     *
+     * @param estado_del_juego Estado actual del juego
+     * @return La heurística del juego, asociada a la posición actual del tablero_copia
+     */
     private int getEstadoJuego(int estado_del_juego) {
         if (estado_del_juego == Conecta4.PLAYER1) {
             return (int) Math.pow(10, CONECTA_N);
@@ -182,6 +189,16 @@ public class IAPlayer extends Player {
         }
     }
 
+    /**
+     * Suma las heurísticas, calculadas por separado, de cada una de las variantes
+     * - Horizontal
+     * - Vertical
+     * - Diagonal positiva, que va desde la esquina inferior izquierda hasta la superior derecha
+     * - Diagonal negativa, que va desde la esquina inferior derecha hasta la superior izquierda
+     *
+     * @param jugador A quién se le está hallando la heurística
+     * @return La heurística asociada al tablero_copia, para el jugador correspondiente
+     */
     private int getHeuristica(int jugador) {
         int heuristica = 0;
         heuristica += getHeuristicaHorizontal(jugador);
