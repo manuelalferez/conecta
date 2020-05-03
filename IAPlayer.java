@@ -175,16 +175,24 @@ public class IAPlayer extends Player {
      * @return La heurística del juego, asociada a la posición actual del tablero_copia
      */
     private int getEstadoJuego(int estado_del_juego) {
+        System.out.println("----------------------------");
+        imprimirTablero();
         if (estado_del_juego == Conecta4.PLAYER1) {
+            System.out.println("Estado del tablero: 10000 ");
             return (int) Math.pow(10, CONECTA_N);
         } else if (estado_del_juego == Conecta4.PLAYER2) {
+            System.out.println("Estado del tablero: -10000");
             return -(int) Math.pow(10, CONECTA_N);
         } else if (ES_EMPATE) {
+            System.out.println("Estado del tablero: 0");
             return 0;
         } else {
             int heuristica_juego = 0;
+            System.out.println("Jugador: 1 (heurísticas acumuladas) ");
             heuristica_juego += getHeuristica(Conecta4.PLAYER1);
+            System.out.println("Jugador: -1 (heurísticas acumuladas)");
             heuristica_juego -= getHeuristica(Conecta4.PLAYER2);
+            System.out.println("Estado del tablero: " + heuristica_juego);
             return heuristica_juego;
         }
     }
@@ -202,9 +210,13 @@ public class IAPlayer extends Player {
     private int getHeuristica(int jugador) {
         int heuristica = 0;
         heuristica += getHeuristicaHorizontal(jugador);
+        System.out.println("Estado del tablero horizontal: " + heuristica);
         heuristica += getHeuristicaVertical(jugador);
+        System.out.println("Estado del tablero vertical: " + heuristica);
         heuristica += getHeuristicaDiagonalPositiva(jugador);
+        System.out.println("Estado del tablero diagonal positiva: " + heuristica);
         heuristica += getHeuristicaDiagonalNegativa(jugador);
+        System.out.println("Estado del tablero diagonal negativa: " + heuristica);
         return heuristica;
     }
 
